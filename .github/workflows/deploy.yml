@@ -1,18 +1,30 @@
-name: App Build
-
+name: CI-WORKFLOW
 on:
   push:
-    branches: [ master ]
+    branches: [ "master", "main", "dev" ]
+  workflow_dispatch:
 
 jobs:
-  # Trigger the reusable template
-  call-shared-ci:
-    # Syntax: {owner}/{repo}/.github/workflows/{filename}@{ref}
-    uses: RAHAMSHAIK007/gabr1/.github/workflows/enterprise-orchestrator.yml@master
-    with:
-      node-version: '20'
-    secrets:
-      DEPLOY_TOKEN: ${{ secrets.PROD_API_KEY }}
+  build-test:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'  
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node-version: [18, 20, 22]
+        exclude:
+          - os: windows-latest
+            node-version: 22
+   
+    steps:
+      - name: checkout
+        uses: actions/checkout@v7
+
+      - name: Cache Dependencies
+        uses: actions/cache@v5
+        with:
+          path: ~/.npm
 
 
 
